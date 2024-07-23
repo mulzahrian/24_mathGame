@@ -2,32 +2,40 @@
 const boxes = document.querySelectorAll('.number-box');
 const shuffleButton = document.getElementById('shuffle-button');
 const checkButton = document.getElementById('check-button');
+const proveButton = document.getElementById('prove-button');
 const solutionContainer = document.getElementById('solution-container');
-
-// Generate a challenging set of numbers
-function generateChallengingNumbers() {
-    const min = 1;
-    const max = 9;
-    const range = max - min + 1;
-    const numbers = [];
-
-    while (numbers.length < 4) {
-        let num = Math.floor(Math.random() * range) + min;
-        // Avoid duplicates and ensure numbers are not too easy
-        if (numbers.indexOf(num) === -1) {
-            numbers.push(num);
-        }
-    }
-
-    return numbers;
-}
+const proofContainer = document.getElementById('proof-container');
+const userInput = document.getElementById('user-input');
 
 function shuffleNumbers() {
-    let numbers = generateChallengingNumbers();
-    boxes.forEach((box, index) => {
-        box.textContent = numbers[index];
-    });
-    solutionContainer.textContent = '';
+    // Add shake class to start animation
+    boxes.forEach(box => box.classList.add('shake'));
+
+    // After animation ends, remove shake class and update numbers
+    setTimeout(() => {
+        let numbers = generateNumbers();
+        boxes.forEach((box, index) => {
+            box.textContent = numbers[index];
+        });
+
+        // Remove shake class to reset
+        boxes.forEach(box => box.classList.remove('shake'));
+
+        // Clear previous solutions
+        solutionContainer.textContent = '';
+        proofContainer.textContent = '';
+    }, 1000); // Duration should match CSS animation duration
+}
+
+function generateNumbers() {
+    const min = 1;
+    const max = 9;
+    const numbers = [];
+    for (let i = 0; i < 4; i++) {
+        let num = Math.floor(Math.random() * (max - min + 1)) + min;
+        numbers.push(num);
+    }
+    return numbers;
 }
 
 function checkSolution() {
@@ -35,11 +43,11 @@ function checkSolution() {
     const solutions = findSolutions(numbers, 24);
 
     if (solutions.length === 0) {
-        solutionContainer.textContent = 'Tidak ada solusi yang ditemukan.';
+        solutionContainer.innerHTML = 'Tidak ada solusi yang ditemukan.';
     } else {
-        // Tampilkan hingga 4 solusi, dengan preferensi campuran operasi
-        const maxSolutions = 4;
-        solutionContainer.innerHTML = solutions.slice(0, maxSolutions)
+        // Limit solutions to maximum of 5
+        const limitedSolutions = solutions.slice(0, 5);
+        solutionContainer.innerHTML = limitedSolutions
             .map(sol => `<div>${sol.expression}</div>`)
             .join('<br>');
     }
@@ -87,7 +95,6 @@ function findSolutions(numbers, target) {
         helper(`${numbers[i]}`, remaining);
     }
 
-    // Sort results to prefer mixed operators
     results.sort((a, b) => {
         const aOps = Object.values(a.usedOperators).reduce((sum, count) => sum + count, 0);
         const bOps = Object.values(b.usedOperators).reduce((sum, count) => sum + count, 0);
@@ -97,8 +104,44 @@ function findSolutions(numbers, target) {
     return results;
 }
 
+function proveSolution() {
+    const numbers = Array.from(boxes).map(box => parseInt(box.textContent));
+    const expression = userInput.value.trim();
+    
+    try {
+        // Check if the expression evaluates to 24
+        if (Math.abs(eval(expression) - 24) < 1e-6) {
+            // Check if the expression uses only the numbers displayed
+            const usedNumbers = expression.match(/\d+/g).map(Number);
+            const numbersCopy = [...numbers];
+            let valid = true;
+
+            for (const num of usedNumbers) {
+                const index = numbersCopy.indexOf(num);
+                if (index === -1) {
+                    valid = false;
+                    break;
+                } else {
+                    numbersCopy.splice(index, 1);
+                }
+            }
+
+            if (valid && numbersCopy.length === 0) {
+                proofContainer.textContent = 'Solusi benar!';
+            } else {
+                proofContainer.textContent = 'Solusi salah atau menggunakan angka yang tidak ditampilkan.';
+            }
+        } else {
+            proofContainer.textContent = 'Solusi salah, hasil evaluasi bukan 24.';
+        }
+    } catch (e) {
+        proofContainer.textContent = 'Ekspresi tidak valid.';
+    }
+}
+
 shuffleButton.addEventListener('click', shuffleNumbers);
 checkButton.addEventListener('click', checkSolution);
+proveButton.addEventListener('click', proveSolution);
 
 // Initial shuffle
 shuffleNumbers();

@@ -2,37 +2,81 @@
 body {
     display: flex;
     flex-direction: column;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     height: 100vh;
     margin: 0;
-    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
 }
 
-#game-container {
+.container {
     display: flex;
-    margin-bottom: 20px;
+    gap: 10px; /* Spasi antar kotak */
 }
 
 .number-box {
-    width: 50px;
-    height: 50px;
-    border: 1px solid #000;
+    width: 60px;
+    height: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 5px;
     font-size: 24px;
-    font-weight: bold;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    transition: transform 0.3s ease;
+    transform-style: preserve-3d;
+    perspective: 1000px; /* Jarak perspektif 3D */
+}
+
+.shake {
+    animation: shake 1s ease;
+}
+
+@keyframes shake {
+    0% {
+        transform: rotateX(0) rotateY(0);
+    }
+    25% {
+        transform: rotateX(90deg) rotateY(0);
+    }
+    50% {
+        transform: rotateX(0) rotateY(90deg);
+    }
+    75% {
+        transform: rotateX(-90deg) rotateY(0);
+    }
+    100% {
+        transform: rotateX(0) rotateY(-90deg);
+    }
 }
 
 button {
     margin: 10px;
     padding: 10px 20px;
     font-size: 16px;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
 }
 
-#solution-container {
+button:hover {
+    background-color: #0056b3;
+}
+
+#solution-container, #proof-container {
     margin-top: 20px;
-    font-size: 18px;
+    font-size: 16px;
+    color: #333;
+}
+
+input[type="text"] {
+    padding: 10px;
+    font-size: 16px;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
 }
